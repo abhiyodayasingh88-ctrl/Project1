@@ -1,0 +1,504 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Code with Abhiyodaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #03032f;
+      --panel: #12121a;
+      --border: rgba(255,255,255,0.07);
+      --accent: #6effd1;
+      --accent2: #a78bfa;
+      --text: #f0f0f5;
+      --muted: #6b6b85;
+      --error: #ff6b6b;
+      --success: #6effd1;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(110,255,209,0.07) 0%, transparent 70%);
+      top: -200px; left: -200px;
+      animation: float1 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%);
+      bottom: -150px; right: -150px;
+      animation: float2 10s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,40px)} }
+    @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,-30px)} }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 420px;
+      padding: 48px 40px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 0 60px rgba(110,255,209,0.04), 0 30px 60px rgba(0,0,0,0.5);
+      animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity:0; transform: translateY(30px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 28px;
+      letter-spacing: -1px;
+      margin-bottom: 6px;
+    }
+    .logo span { color: var(--accent); }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 36px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 32px;
+      gap: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #0a0a0f;
+      font-weight: 600;
+    }
+
+    /* Forms */
+    .form { display: none; flex-direction: column; gap: 18px; }
+    .form.active { display: flex; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+    }
+    .field input {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(110,255,209,0.08);
+    }
+    .field input::placeholder { color: var(--muted); }
+    .field input.error { border-color: var(--error); box-shadow: 0 0 0 3px rgba(255,107,107,0.08); }
+
+    .btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      position: relative;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(110,255,209,0.25); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: #0a0a0f;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin: 0 auto;
+    }
+    .btn.loading .btn-text { display: none; }
+    .btn.loading .spinner { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Message box */
+    .message {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .message.show { display: flex; }
+    .message.error { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.2); color: var(--error); }
+    .message.success { background: rgba(110,255,209,0.08); border: 1px solid rgba(110,255,209,0.2); color: var(--success); }
+    .message.info { background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.2); color: var(--accent2); }
+
+    /* Success / Welcome Screen */
+    .welcome {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      animation: fadeIn 0.4s ease;
+    }
+    .welcome.show { display: flex; }
+    .welcome-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(110,255,209,0.12);
+      border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px;
+      animation: pop 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    @keyframes pop { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+    .welcome h2 { font-family:'Syne',sans-serif; font-size:22px; font-weight:700; }
+    .welcome p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .welcome-user { color: var(--accent); }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--muted); font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border);
+    }
+
+    .switch-text {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .switch-text a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .switch-text a:hover { text-decoration: underline; }
+
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Welcome / Success Screen -->
+  <div class="welcome" id="welcomeScreen">
+    <div class="welcome-icon">🎉</div>
+    <h2>Welcome back, <span class="welcome-user" id="welcomeName"></span>!</h2>
+    <p>Login successful. You are now being redirected to your dashboard...</p>
+    <div class="divider">or</div>
+    <button class="btn" onclick="resetToLogin()" style="background:var(--accent2);">
+      <span class="btn-text">Go Back</span>
+    </button>
+  </div>
+
+  <!-- Auth Section -->
+  <div id="authSection">
+    <div class="logo">Code with Abhiyodaya<span>.</span></div>
+    <p class="subtitle">Secure access to your workspace</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- Message -->
+    <div class="message" id="msgBox">
+      <span id="msgIcon">⚠️</span>
+      <span id="msgText"></span>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="form active" id="loginForm">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="loginUser" placeholder="Enter your username" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="Enter your password" />
+      </div>
+      <button class="btn" id="loginBtn" onclick="handleLogin()">
+        <div class="spinner"></div>
+        <span class="btn-text">Login →</span>
+      </button>
+      <p class="switch-text">Don't have an account? <a onclick="switchTab('signup')">Sign Up</a></p>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div class="form" id="signupForm">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="signupName" placeholder="Your full name" />
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="signupUser" placeholder="Choose a username" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="signupPass" placeholder="Create a password" />
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="signupConfirm" placeholder="Repeat your password" />
+      </div>
+      <button class="btn" id="signupBtn" onclick="handleSignup()">
+        <div class="spinner"></div>
+        <span class="btn-text">Create Account →</span>
+      </button>
+      <p class="switch-text">Already have an account? <a onclick="switchTab('login')">Login</a></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ─── Simulated User Database (localStorage) ───────────────────────────────
+  function getUsers() {
+    return JSON.parse(localStorage.getItem('auth_users') || '{}');
+  }
+  function saveUsers(users) {
+    localStorage.setItem('auth_users', JSON.stringify(users));
+  }
+
+  // ─── Mock API (replace with real API calls) ───────────────────────────────
+  async function apiLogin(username, password) {
+    await delay(1000); // Simulate network request
+    const users = getUsers();
+    if (users[username] && users[username].password === password) {
+      return { success: true, user: { name: users[username].name, username } };
+    }
+    return { success: false, message: 'Invalid username or password.' };
+  }
+
+  async function apiSignup(name, username, password) {
+    await delay(1200);
+    const users = getUsers();
+    if (users[username]) {
+      return { success: false, message: 'Username already taken. Try another.' };
+    }
+    users[username] = { name, password };
+    saveUsers(users);
+    return { success: true, user: { name, username } };
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function showMessage(text, type = 'error') {
+    const box = document.getElementById('msgBox');
+    const icon = document.getElementById('msgIcon');
+    const msg  = document.getElementById('msgText');
+    box.className = `message show ${type}`;
+    icon.textContent = type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
+    msg.textContent = text;
+  }
+
+  function hideMessage() {
+    document.getElementById('msgBox').className = 'message';
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) { btn.classList.add('loading'); btn.disabled = true; }
+    else          { btn.classList.remove('loading'); btn.disabled = false; }
+  }
+
+  function clearInputs(...ids) {
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      el.value = '';
+      el.classList.remove('error');
+    });
+  }
+
+  function markError(...ids) {
+    ids.forEach(id => document.getElementById(id).classList.add('error'));
+  }
+
+  // ─── Tab Switching ─────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    hideMessage();
+    document.querySelectorAll('.tab-btn').forEach((b,i) =>
+      b.classList.toggle('active', (tab==='login' && i===0)||(tab==='signup' && i===1))
+    );
+    document.getElementById('loginForm').classList.toggle('active', tab==='login');
+    document.getElementById('signupForm').classList.toggle('active', tab==='signup');
+  }
+
+  // ─── Login Handler ─────────────────────────────────────────────────────────
+  async function handleLogin() {
+    hideMessage();
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+
+    if (!username || !password) {
+      showMessage('Please fill in all fields.', 'error');
+      if (!username) markError('loginUser');
+      if (!password) markError('loginPass');
+      return;
+    }
+
+    setLoading('loginBtn', true);
+
+    try {
+      const res = await apiLogin(username, password);
+      if (res.success) {
+        showWelcome(res.user.name);
+      } else {
+        showMessage(res.message + ' Please sign up if you don\'t have an account.', 'error');
+        markError('loginUser', 'loginPass');
+        // Suggest signup after 1.5s
+        setTimeout(() => switchTab('signup'), 2500);
+      }
+    } catch(e) {
+      showMessage('Something went wrong. Please try again.', 'error');
+    } finally {
+      setLoading('loginBtn', false);
+    }
+  }
+
+  // ─── Signup Handler ────────────────────────────────────────────────────────
+  async function handleSignup() {
+    hideMessage();
+    const name     = document.getElementById('signupName').value.trim();
+    const username = document.getElementById('signupUser').value.trim();
+    const password = document.getElementById('signupPass').value;
+    const confirm  = document.getElementById('signupConfirm').value;
+
+    if (!name || !username || !password || !confirm) {
+      showMessage('Please fill in all fields.', 'error');
+      if (!name)     markError('signupName');
+      if (!username) markError('signupUser');
+      if (!password) markError('signupPass');
+      if (!confirm)  markError('signupConfirm');
+      return;
+    }
+    if (password !== confirm) {
+      showMessage('Passwords do not match!', 'error');
+      markError('signupPass', 'signupConfirm');
+      return;
+    }
+    if (password.length < 6) {
+      showMessage('Password must be at least 6 characters.', 'error');
+      markError('signupPass');
+      return;
+    }
+
+    setLoading('signupBtn', true);
+
+    try {
+      const res = await apiSignup(name, username, password);
+      if (res.success) {
+        showWelcome(res.user.name);
+      } else {
+        showMessage(res.message, 'error');
+        markError('signupUser');
+      }
+    } catch(e) {
+      showMessage('Something went wrong. Please try again.', 'error');
+    } finally {
+      setLoading('signupBtn', false);
+    }
+  }
+
+  // ─── Show Welcome Screen ───────────────────────────────────────────────────
+  function showWelcome(name) {
+    document.getElementById('authSection').style.display = 'none';
+    document.getElementById('welcomeName').textContent = name;
+    document.getElementById('welcomeScreen').classList.add('show');
+  }
+
+  function resetToLogin() {
+    document.getElementById('authSection').style.display = 'block';
+    document.getElementById('welcomeScreen').classList.remove('show');
+    hideMessage();
+    clearInputs('loginUser','loginPass','signupName','signupUser','signupPass','signupConfirm');
+    switchTab('login');
+  }
+
+  // ─── Clear error on typing ─────────────────────────────────────────────────
+  document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', () => input.classList.remove('error'));
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const loginActive = document.getElementById('loginForm').classList.contains('active');
+        if (loginActive) handleLogin();
+        else handleSignup();
+      }
+    });
+  });
+</script>
+</body>
+</html>
