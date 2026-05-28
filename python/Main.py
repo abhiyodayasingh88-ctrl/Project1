@@ -1,15 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import sqlite3
 import hashlib
-import os
 
 app = Flask(__name__)
-CORS(app)  # Frontend se connect hone deta hai
+CORS(app)
 
 DB_NAME = "users.db"
 
-# ─── Database Setup ───────────────────────────────────────────
+# ─── DATABASE ─────────────────────────────
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -27,11 +26,16 @@ def init_db():
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# ─── SIGNUP API ───────────────────────────────────────────────
+# ─── FRONTEND ─────────────────────────────
+@app.route("/")
+def home():
+    return send_file("index.html")
+
+# ─── SIGNUP ───────────────────────────────
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
-    name     = data.get('name', '').strip()
+    name = data.get('name', '').strip()
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
 
@@ -53,7 +57,7 @@ def signup():
     except sqlite3.IntegrityError:
         return jsonify({'success': False, 'message': 'Username already exists!'}), 409
 
-# ─── LOGIN API ────────────────────────────────────────────────
+# ─── LOGIN ────────────────────────────────
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -79,15 +83,7 @@ def login():
     else:
         return jsonify({'success': False, 'message': 'Galat username ya password!'}), 401
 
-# ─── Run Server ───────────────────────────────────────────────
-from flask import Flask, send_file
-
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return send_file("index.html")
-
+# ─── RUN ────────────────────────────────
 if __name__ == '__main__':
     init_db()
     print("Server running...")
