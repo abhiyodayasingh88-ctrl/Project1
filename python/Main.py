@@ -80,11 +80,15 @@ def login():
         return jsonify({'success': False, 'message': 'Galat username ya password!'}), 401
 
 # ─── Run Server ───────────────────────────────────────────────
+from flask import Flask, send_file
+
+app = Flask(__name__)
+
 @app.route("/")
 def home():
-    return "Server Running Successfully!"
+    return send_file("index.html")
 
 if __name__ == '__main__':
     init_db()
-    print("✅ Server running: http://localhost:5000")
+    print("Server running...")
     app.run(debug=True, port=5000)
