@@ -326,7 +326,7 @@
 <script>
   // ─── API Calls to Flask Backend ───────────────────────────────────────────
   async function apiLogin(username, password) {
-    const res = await fetch('http://localhost:5000/login', {
+    const res = await fetch(`${API_BASE}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
@@ -335,7 +335,7 @@
   }
 
   async function apiSignup(name, username, password) {
-    const res = await fetch('http://localhost:5000/signup', {
+    const res = await fetch(`${API_BASE}/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, username, password })
