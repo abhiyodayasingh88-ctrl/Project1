@@ -324,38 +324,26 @@
 </div>
 
 <script>
-  // ─── Simulated User Database (localStorage) ───────────────────────────────
-  function getUsers() {
-    return JSON.parse(localStorage.getItem('auth_users') || '{}');
-  }
-  function saveUsers(users) {
-    localStorage.setItem('auth_users', JSON.stringify(users));
-  }
-
-  // ─── Mock API (replace with real API calls) ───────────────────────────────
+  // ─── API Calls to Flask Backend ───────────────────────────────────────────
   async function apiLogin(username, password) {
-    await delay(1000); // Simulate network request
-    const users = getUsers();
-    if (users[username] && users[username].password === password) {
-      return { success: true, user: { name: users[username].name, username } };
-    }
-    return { success: false, message: 'Invalid username or password.' };
+    const res = await fetch('http://localhost:5000/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    return res.json();
   }
 
   async function apiSignup(name, username, password) {
-    await delay(1200);
-    const users = getUsers();
-    if (users[username]) {
-      return { success: false, message: 'Username already taken. Try another.' };
-    }
-    users[username] = { name, password };
-    saveUsers(users);
-    return { success: true, user: { name, username } };
+    const res = await fetch('http://localhost:5000/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, username, password })
+    });
+    return res.json();
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
+  // ─── Helpers ───────────────────────────────────────────────────────────────
   function showMessage(text, type = 'error') {
     const box = document.getElementById('msgBox');
     const icon = document.getElementById('msgIcon');
@@ -387,7 +375,7 @@
     ids.forEach(id => document.getElementById(id).classList.add('error'));
   }
 
-  // ─── Tab Switching ─────────────────────────────────────────────────────────
+  // ─── Tab Switching ────────────────────────────────────────────────────────
   function switchTab(tab) {
     hideMessage();
     document.querySelectorAll('.tab-btn').forEach((b,i) =>
@@ -397,7 +385,7 @@
     document.getElementById('signupForm').classList.toggle('active', tab==='signup');
   }
 
-  // ─── Login Handler ─────────────────────────────────────────────────────────
+  // ─── Login Handler ────────────────────────────────────────────────────────
   async function handleLogin() {
     hideMessage();
     const username = document.getElementById('loginUser').value.trim();
@@ -415,11 +403,10 @@
     try {
       const res = await apiLogin(username, password);
       if (res.success) {
-        showWelcome(res.user.name);
+        showWelcome(res.name);
       } else {
         showMessage(res.message + ' Please sign up if you don\'t have an account.', 'error');
         markError('loginUser', 'loginPass');
-        // Suggest signup after 1.5s
         setTimeout(() => switchTab('signup'), 2500);
       }
     } catch(e) {
@@ -429,7 +416,7 @@
     }
   }
 
-  // ─── Signup Handler ────────────────────────────────────────────────────────
+  // ─── Signup Handler ───────────────────────────────────────────────────────
   async function handleSignup() {
     hideMessage();
     const name     = document.getElementById('signupName').value.trim();
@@ -461,7 +448,7 @@
     try {
       const res = await apiSignup(name, username, password);
       if (res.success) {
-        showWelcome(res.user.name);
+        showWelcome(res.name);
       } else {
         showMessage(res.message, 'error');
         markError('signupUser');
@@ -473,7 +460,7 @@
     }
   }
 
-  // ─── Show Welcome Screen ───────────────────────────────────────────────────
+  // ─── Show Welcome Screen ──────────────────────────────────────────────────
   function showWelcome(name) {
     document.getElementById('authSection').style.display = 'none';
     document.getElementById('welcomeName').textContent = name;
@@ -488,7 +475,7 @@
     switchTab('login');
   }
 
-  // ─── Clear error on typing ─────────────────────────────────────────────────
+  // ─── Clear error on typing ────────────────────────────────────────────────
   document.querySelectorAll('input').forEach(input => {
     input.addEventListener('input', () => input.classList.remove('error'));
     input.addEventListener('keydown', e => {
