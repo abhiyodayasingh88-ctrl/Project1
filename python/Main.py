@@ -80,6 +80,10 @@ def login():
         return jsonify({'success': False, 'message': 'Galat username ya password!'}), 401
 
 # ─── Run Server ───────────────────────────────────────────────
+@app.route("/")
+def home():
+    return "Server Running Successfully!"
+
 if __name__ == '__main__':
     init_db()
     print("✅ Server running: http://localhost:5000")
