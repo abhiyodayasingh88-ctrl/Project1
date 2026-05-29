@@ -1,20 +1,23 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-import sqlite3
+import psycopg2
 import hashlib
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-DB_NAME = "users.db"
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# ─── DATABASE ─────────────────────────────
+def get_conn():
+    return psycopg2.connect(DATABASE_URL)
+
 def init_db():
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_conn()
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             name TEXT NOT NULL,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL
@@ -23,15 +26,15 @@ def init_db():
     conn.commit()
     conn.close()
 
+init_db()
+
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# ─── FRONTEND ─────────────────────────────
 @app.route("/")
 def home():
     return send_file("index.html")
 
-# ─── SIGNUP ───────────────────────────────
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
@@ -43,21 +46,19 @@ def signup():
         return jsonify({'success': False, 'message': 'Saare fields bharein!'}), 400
 
     hashed = hash_password(password)
-
     try:
-        conn = sqlite3.connect(DB_NAME)
+        conn = get_conn()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO users (name, username, password) VALUES (?, ?, ?)",
+            "INSERT INTO users (name, username, password) VALUES (%s, %s, %s)",
             (name, username, hashed)
         )
         conn.commit()
         conn.close()
         return jsonify({'success': True, 'message': 'Account ban gaya!', 'name': name})
-    except sqlite3.IntegrityError:
+    except psycopg2.errors.UniqueViolation:
         return jsonify({'success': False, 'message': 'Username already exists!'}), 409
 
-# ─── LOGIN ────────────────────────────────
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -68,11 +69,10 @@ def login():
         return jsonify({'success': False, 'message': 'Username aur password daalein!'}), 400
 
     hashed = hash_password(password)
-
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_conn()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT name FROM users WHERE username=? AND password=?",
+        "SELECT name FROM users WHERE username=%s AND password=%s",
         (username, hashed)
     )
     user = cursor.fetchone()
@@ -83,8 +83,6 @@ def login():
     else:
         return jsonify({'success': False, 'message': 'Galat username ya password!'}), 401
 
-# ─── RUN ────────────────────────────────
 if __name__ == '__main__':
-    init_db()
     print("Server running...")
     app.run(host='0.0.0.0', port=10000)
